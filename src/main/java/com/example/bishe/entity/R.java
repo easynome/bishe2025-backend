@@ -13,4 +13,8 @@ public class R<T> {
     public static <T> R<T> success(T data) {
         return new R<>(200, "ok", data);
     }
+
+    public static <T> R<T> failed(String msg) {
+        return new R<>(400, msg, null);
+    }
 }

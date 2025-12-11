@@ -1,0 +1,13 @@
+// TODO 后续：JWT 刷新 /api/auth/refresh
+// TODO 后续：课程命中率监控 /api/course/hit-rate
+// TODO 后续：Redis 缓存预热 /api/cache/warm
+| 功能     | 说辞                      | 技术预留                       |
+| ------ | ----------------------- | -------------------------- |
+| JWT 刷新 | “后续加 /api/auth/refresh” | 留 RefreshToken 字段          |
+| 课程统计   | “教师看板用 ECharts”         | 留 `/api/course/stats` 空方法  |
+| 上下架    | “软删除字段+状态枚举”            | course 表加 `status` 字段      |
+| 数据导出   | “EasyExcel 预留接口”        | 留 `/api/export/course` 空方法 |
+| 消息通知   | “WebSocket 后续接入”        | 留 `/api/notify` 空方法        |
+| 系统日志   | “AOP 已留切点”              | 留 `SysLogAspect.java` 空类   |
+| 命中率监控  | “Redis 计数器”             | 留 `HitRateService` 空类      |
+| 缓存预热   | “Spring Cache 预热”       | 留 `CacheWarmUp.java` 空类    |

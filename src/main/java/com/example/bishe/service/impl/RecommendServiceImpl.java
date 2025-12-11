@@ -4,7 +4,7 @@ import com.example.bishe.entity.Course;
 import com.example.bishe.entity.UserCourseScore;
 import com.example.bishe.mapper.CourseMapper;
 import com.example.bishe.mapper.UserCourseScoreMapper;
-import com.example.bishe.service.RecommenService;
+import com.example.bishe.service.RecommendService;
 import com.example.bishe.util.CosineUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
  */
 @Service
 @RequiredArgsConstructor
-public class RecommendServiceImpl implements RecommenService {
+public class RecommendServiceImpl implements RecommendService {
     private final UserCourseScoreMapper scoreMapper;
     private final CourseMapper courseMapper;
 

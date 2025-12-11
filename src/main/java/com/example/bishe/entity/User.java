@@ -10,14 +10,19 @@ import lombok.Data;
 import java.util.Date;
 
 @Data
-@TableName("user_course_score")
-public class UserCourseScore {
+@TableName("user")
+public class User {
     @TableId(type = IdType.AUTO)
     private Long id;
-    private Long userId;
-    private Long courseId;
-    private Integer score;
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-    @TableField("created_at")  // ✅ 确保有这个注解
+    private String username;
+    private String password;   // 上一步加过
+    private Integer roleId;
+    @TableField("created_at")
     private Date createdAt;
+    // 如果需要格式化显示，可以添加
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    public Date getCreatedAt() {
+        return createdAt;
+    }
+    // 其余字段忽略
 }

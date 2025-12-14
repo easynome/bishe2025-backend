@@ -1,5 +1,6 @@
 package com.example.bishe.controller;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -18,10 +19,13 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.mindrot.jbcrypt.BCrypt;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api")
@@ -141,7 +145,96 @@ public class UserController {
         return token.startsWith("Bearer ") ? token.substring(7) : token;
     }
 
+    //获取用户列表
+    @GetMapping("/admin/users/list")
+    public R<Map<String, Object>> getUsersForAdmin(
+            @RequestParam(defaultValue = "1") Integer page,
+            @RequestParam(defaultValue = "10") Integer size,
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) Integer roleId
+    ){
+        LambdaQueryWrapper<User> wrapper = new LambdaQueryWrapper<>();
 
+        if(keyword != null&& !keyword.trim().isEmpty()){
+            wrapper.like(User::getUsername, keyword);
+        }
+
+        if(roleId != null){
+            wrapper.eq(User::getRoleId, roleId);
+        }
+
+//        wrapper.ne(User::getId, currentUserId);
+        wrapper.orderByDesc(User::getCreatedAt);
+
+        Page<User> pageInfo = new Page<>(page, size);
+        Page<User> userPage = userService.page(pageInfo, wrapper);
+
+        List< User> users = userPage.getRecords();
+        Map<Integer, String> roleMap = roleService.list()
+                .stream()
+                .collect(Collectors.toMap(Role::getId, Role::getName));
+
+        List<Map<String, Object>> userList = users.stream()
+                .map(user -> {
+                    Map<String, Object> map = new HashMap<>();
+                    map.put("id", user.getId());
+                    map.put("username", user.getUsername());
+                    map.put("roleId", user.getRoleId());
+                    map.put("roleName", roleMap.get(user.getRoleId()));
+                    map.put("createdAt", user.getCreatedAt());
+                    map.put("status", user.getStatus()!= null? user.getStatus() : 1);
+                    return map;
+                }).collect(Collectors.toList());
+        Map<String, Object> result = new HashMap<>();
+        result.put("users", userList);
+        result.put("total", userPage.getTotal());
+        result.put("pages", userPage.getPages());
+        result.put("current", userPage.getCurrent());
+        result.put("size", userPage.getSize());
+        return R.success(result);
+    }
+
+    //修改用户角色
+    @PostMapping("/admin/users/{id}/role")
+    public R<String> updateUserRole(@PathVariable Long id,
+                                    @RequestBody Integer roleId,
+                                    HttpServletRequest  request) {
+
+        //验证权限（仅管理员可修改用户角色）
+        //验证角色ID有效性（1-学生，2-教师，3-管理员）
+
+        User user = userService.getById(id);
+        if(user == null) {
+            return R.failed("用户不存在");
+        }
+        Role role = roleService.getById(roleId);
+        if(role == null){
+            return R.failed("角色不存在");
+        }
+        user.setRoleId(roleId);
+        userService.updateById(user);
+
+        return R.success("更新用户角色成功");
+    }
+
+    //修改用户状态
+    @PostMapping("/admin/users/{id}/status")
+    public R<String> updateUserStatus(@PathVariable Long id,
+                                      @RequestBody Integer status,
+                                      HttpServletRequest  request) {
+
+        if(status != 1 && status != 0){
+            return R.failed("状态值无效");
+        }
+        User user = userService.getById(id);
+        if(user == null){
+            return R.failed("用户不存在");
+        }
+        user.setStatus(status);
+        userService.updateById(user);
+
+        return R.success(status == 1 ? "用户已启用" :"用户已禁用");
+    }
     /**
      * 校验密码（假设使用BCrypt）
      */

@@ -62,7 +62,7 @@
 
             <!-- 评分列表 -->
             <el-table :data="ratedCourses" style="width: 100%" class="rating-table">
-              <el-table-column prop="courseName" label="课程名称" width="250">
+              <el-table-column prop="courseName" label="课程名称"  align="center" header-align="center">
                 <template #default="scope">
                   <div class="course-name-cell">
                     <span class="course-name">{{ scope.row.courseName }}</span>
@@ -73,7 +73,7 @@
                 </template>
               </el-table-column>
 
-              <el-table-column label="我的评分" width="180">
+              <el-table-column label="我的评分"  align="center" header-align="center" >
                 <template #default="scope">
                   <div class="rating-display">
                     <el-rate v-model="scope.row.score" disabled class="rating-stars" />
@@ -83,7 +83,7 @@
                 </template>
               </el-table-column>
 
-              <el-table-column  label="评分时间" width="200">
+              <el-table-column  label="评分时间" align="center" header-align="center">
                 <template #default="scope">
                   <div @click="console.log('时间数据：', scope.row)">
                   {{ formatDate(scope.row.createdAt) }}
@@ -91,7 +91,7 @@
                 </template>
               </el-table-column>
 
-              <el-table-column label="操作" width="120">
+              <el-table-column label="操作"  align="center" header-align="center">
                 <template #default="scope">
                   <el-button type="primary" link @click="viewCourseDetail(scope.row.courseId)">
                     查看课程
@@ -357,6 +357,13 @@ onMounted(() => {
 
 <style scoped>
 .my-learning {
+  position: fixed;
+  top: 96px;
+  left: v-bind('$store.state.asideWidth');
+  right: 0;
+  bottom: 0;
+  transition: margin-left 0.2s;
+  overflow-y: auto;
   padding: 20px;
 }
 

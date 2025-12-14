@@ -104,10 +104,10 @@ const allMenus= {
       "icon": "operation",
       "children": [
         {
-          "name": "用户管理", "icon": "user", "path": "/operation/user"
+          "name": "用户管理", "icon": "user", "path": "/admin/users/list"
         },
         {
-          "name": "课程管理", "icon": "document", "path": "/operation/course"
+          "name": "课程管理", "icon": "document", "path": "/admin/courses/list"
         }
       ]
     }

@@ -19,6 +19,7 @@ public class User {
     private Integer roleId;
     @TableField("created_at")
     private Date createdAt;
+    private Integer status; // 0: 禁用 1: 正常
     // 如果需要格式化显示，可以添加
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     public Date getCreatedAt() {

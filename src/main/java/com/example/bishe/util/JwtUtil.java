@@ -31,11 +31,6 @@ public class JwtUtil {
     //Claims类型的返回值，包含用户名、用户ID、签发时间、过期时间等信息
     public static Claims parse(String token) {
         try {
-//            return Jwts.parser()
-//                    .setSigningKey(SECRET_KEY)
-//                    .parseClaimsJws(token)
-//                    .getBody()
-//                    .getSubject();
             return Jwts.parser()
                     .setSigningKey(SECRET_KEY)
                     .parseClaimsJws(token)

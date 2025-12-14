@@ -163,7 +163,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { getCourseDetail, rateCourse, getRecommendations } from '~/api/manager'
+import { getCourseDetailByTeacher, rateCourse, getRecommendations } from '~/api/manager'
 import { ElMessage } from 'element-plus'
 import {
   Calendar,
@@ -193,7 +193,7 @@ const similarCourses = ref([])
 const loadCourseDetail = async () => {
   loading.value = true
   try {
-    const res = await getCourseDetail(courseId)
+    const res = await getCourseDetailByTeacher(courseId)
     if (res.data.code === 200) {
       course.value = res.data.data || {}
       // 加载后检查用户是否已评分

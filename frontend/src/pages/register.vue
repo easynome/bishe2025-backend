@@ -10,6 +10,7 @@
           :model="form"
           :rules="rules"
           label-width="110px"
+          @keyup.enter="handleRegister"
       >
       <el-form-item label="用户名" prop="username">
         <el-input
@@ -68,6 +69,7 @@
 import { ref, reactive } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
+import { register } from '~/api/manager'
 
 const router = useRouter()
 const registerFormRef = ref(null)
@@ -112,9 +114,9 @@ const handleRegister = async () => {
 
   try {
     // 调用注册API（实际项目中替换为真实接口）
-    // const res = await register(form.username, form.password, form.confirmPassword)
+    const res = await register(form.username, form.password, form.confirmPassword)
     // 模拟成功响应（测试用）
-    const res = { data: { code: 200 } }
+    // const res = { data: { code: 200 } }
 
     if (res.data.code === 200) {
       ElMessage.success('注册成功，请登录')

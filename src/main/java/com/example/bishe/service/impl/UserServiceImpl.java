@@ -1,9 +1,12 @@
 package com.example.bishe.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.example.bishe.entity.R;
 import com.example.bishe.entity.User;
 import com.example.bishe.mapper.UserMapper;
 import com.example.bishe.service.UserService;
+import jakarta.servlet.http.HttpServletRequest;
+import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -16,14 +19,16 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         if(user == null) throw new RuntimeException("用户不存在");
 
         //TODO: 验证旧密码
-        if (!user.getPassword().equals(oldPassword)){
+        if (!BCrypt.checkpw(oldPassword, user.getPassword())){
             throw new RuntimeException("旧密码错误");
         }
+        String encryptedNewPassword = BCrypt.hashpw(newPassword, BCrypt.gensalt());
         //TODO: 修改密码
         this.lambdaUpdate()
                 .eq(User::getUsername, username)
-                .set(User::getPassword, newPassword)
+                .set(User::getPassword, encryptedNewPassword)
                 .update();
-
     }
+
+
 }

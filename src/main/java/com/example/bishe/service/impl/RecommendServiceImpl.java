@@ -36,6 +36,14 @@ public class RecommendServiceImpl implements RecommendService {
         // 获取所有用户对课程的评分记录
         List<UserCourseScore> all = scoreMapper.selectList(null);
 
+        long userScoreCount=all.stream()
+                .filter(s->s.getUserId()!=null&&s.getUserId().equals(userId))
+                .count();
+
+        if(userScoreCount<3){
+            return getHotCourse(all,topN);
+        }
+
         // 构建以用户ID为键、课程ID与评分映射为值的数据结构
         Map<Long, Map<Long, Integer>> userMap = all.stream()
                 .collect(Collectors.groupingBy(UserCourseScore::getUserId,
@@ -76,5 +84,23 @@ public class RecommendServiceImpl implements RecommendService {
                 .limit(topN)                                                               // 截取前topN项
                 .map(en -> courseMapper.selectById(en.getKey()))                           // 查询对应课程实体
                 .collect(Collectors.toList());                                             // 转换为List返回
+    }
+
+    /**
+     * 冷启动兜底方法: 获取最热门的课程
+     * @param allScores
+     * @param topN
+     * @return
+     */
+    @Override
+    public List<Course> getHotCourse(List<UserCourseScore> allScores, int topN){
+        return allScores.stream()
+                .collect(Collectors.groupingBy(UserCourseScore::getCourseId,
+                        Collectors.counting()))
+                .entrySet().stream()
+                .sorted(Map.Entry.<Long, Long>comparingByValue().reversed())
+                .limit(topN)
+                .map(entry -> courseMapper.selectById(entry.getKey()))//根据ID查询课程实体
+                .collect(Collectors.toList());
     }
 }

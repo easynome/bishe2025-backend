@@ -97,7 +97,7 @@
           style="width: 100%; margin-top: 20px;"
           :row-class-name="tableRowClassName"
       >
-          <el-table-column prop="name" label="课程名称" width="200" align="center">
+          <el-table-column prop="name" label="课程名称"  align="center">
           <template #default="scope">
             <div style="display: flex; align-items: center; gap: 10px;">
               <div class="course-avatar">
@@ -111,7 +111,7 @@
           </template>
         </el-table-column>
 
-        <el-table-column prop="description" label="描述" width="200" align="center">
+        <el-table-column prop="description" label="描述"  align="center">
           <template #default="scope">
             <div class="course-description">
               {{ scope.row.description || '暂无描述' }}
@@ -119,7 +119,7 @@
           </template>
         </el-table-column>
 
-        <el-table-column prop="credit" label="学分" width="90" align="center">
+        <el-table-column prop="credit" label="学分"  align="center">
           <template #default="scope">
             <el-tag :type="getCreditTagType(scope.row.credit)" size="small">
               {{ scope.row.credit }}
@@ -127,7 +127,7 @@
           </template>
         </el-table-column>
 
-        <el-table-column prop="studentCount" label="学生数" width="90" align="center">
+        <el-table-column prop="studentCount" label="学生数"  align="center">
           <template #default="scope">
             <el-tag
                 :type="scope.row.studentCount > 0 ? 'success' : 'info'"
@@ -138,7 +138,7 @@
           </template>
         </el-table-column>
 
-        <el-table-column prop="status" label="状态" width="200" align="center">
+        <el-table-column prop="status" label="状态"  align="center">
           <template #default="scope">
             <el-switch
                 v-model="scope.row.status"
@@ -151,7 +151,7 @@
           </template>
         </el-table-column>
 
-        <el-table-column prop="createdAt" label="发布时间" width="180" align="center" >
+        <el-table-column prop="createdAt" label="发布时间"  align="center" >
           <template #default="scope">
             {{ formatDate(scope.row.createdAt) }}
           </template>

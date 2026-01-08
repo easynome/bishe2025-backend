@@ -141,6 +141,9 @@ export function updateCourseByAdmin(id, courseData) {
   return axios.put(`/course/admin/courses/${id}`, courseData)
 }
 
+export function getDashboardData(){
+  return axios.get('/course/data')
+}
 /*********** 推荐课程相关 ***********/
 // 获取推荐课程
 export function getRecommendations(num = 10) {

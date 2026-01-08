@@ -11,11 +11,14 @@ import com.example.bishe.entity.UserCourseScore;
 import com.example.bishe.mapper.UserCourseScoreMapper;
 import com.example.bishe.service.CourseService;
 import com.example.bishe.service.UserService;
+import com.example.bishe.service.impl.RecommendServiceImpl;
 import com.example.bishe.util.JwtUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -27,6 +30,7 @@ public class CourseController {
     private final UserCourseScoreMapper scoreMapper;
     private final UserService userService;
     private final UserCourseScoreMapper userCourseScoreMapper;
+    private final RecommendServiceImpl recommendService;
 
 
     //分页查询
@@ -466,8 +470,25 @@ public class CourseController {
         }
     }
 
+    //获取仪表盘数据
+    @GetMapping("/data")
+    public R<Map<String, Object>> getDashboardData() {
+        Map<String, Object> result = new HashMap<>();
+        List<UserCourseScore> allScores = userCourseScoreMapper.selectList(null);
 
+        List<Course> hotList = recommendService.getHotCourse(allScores, 10);
+        result.put("hotList", hotList);
 
+        long studentCount = allScores.stream().map(UserCourseScore::getUserId).distinct().count();
+        result.put("totalStudents", studentCount);
+
+        result.put("courseCount", courseService.count());
+
+        result.put("engineStatus","User-CF + Hot Fallback Enabled");
+        result.put("updateTime", LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+
+        return R.success(result);
+    }
     //获取所有课程
     @GetMapping("/all")
     public R<List<Course>> list(){

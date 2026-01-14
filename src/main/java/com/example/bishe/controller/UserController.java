@@ -10,8 +10,6 @@ import com.example.bishe.dto.UpdatePwdDTO;
 import com.example.bishe.entity.R;
 import com.example.bishe.entity.Role;
 import com.example.bishe.entity.User;
-import com.example.bishe.entity.UserCourseScore;
-import com.example.bishe.mapper.UserCourseScoreMapper;
 import com.example.bishe.service.RoleService;
 import com.example.bishe.service.UserService;
 import com.example.bishe.util.JwtUtil;
@@ -19,7 +17,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.mindrot.jbcrypt.BCrypt;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -45,8 +42,8 @@ public class UserController {
     @PostMapping("/login")
     public R<Map<String,String>> login(@RequestBody LoginDTO dto){
         try {
-            User user = userService.getOne(
-                    Wrappers.<User>lambdaQuery().eq(User::getUsername, dto.getUsername()));
+            //使用Wrappers.lambdaQuery()创建查询条件
+            User user = userService.getByUsername(dto.getUsername());
             if(user == null){
                 return R.failed("用户名或密码错误");
             }
@@ -69,8 +66,7 @@ public class UserController {
             String cleanToken = token.startsWith("Bearer ") ? token.substring(7) : token;
             String username = JwtUtil.parse(cleanToken).getSubject();
 
-            User user = userService.getOne(
-                    Wrappers.<User>lambdaQuery().eq(User::getUsername, username));
+            User user = userService.getByUsername( username);
 
             if (user == null) {
                 return R.failed("用户不存在");

@@ -8,6 +8,19 @@ spring:
     password: "0527"   # 纯数字也加双引号，避免被当成八进制
     driver-class-name: com.mysql.cj.jdbc.Driver
 
+  data:
+    redis:
+      url: redis://localhost:6379
+      # 如果Redis有密码，则使用：redis://:password@localhost:6379
+      timeout: 200ms
+      lettuce:
+        shutdown-timeout: 200ms
+        pool:
+          max-active: 20
+          max-idle: 10
+          min-idle: 5
+          max-wait: 100ms
+
 mybatis-plus:
   configuration:
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl

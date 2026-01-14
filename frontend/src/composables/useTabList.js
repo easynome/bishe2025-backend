@@ -36,8 +36,10 @@ export function useTabList() {
 //初始化标签导航列表
     function initTabList() {
         let tbs = cookie.get('tagList')
-        if (tbs) {
+        if (tbs &&Array.isArray(tbs)) {
             tabList.value = tbs
+        }else{
+            cookie.set('tagList', tabList.value)
         }
     }
 

@@ -6,13 +6,12 @@ import com.example.bishe.mapper.CourseMapper;
 import com.example.bishe.mapper.UserCourseScoreMapper;
 import com.example.bishe.service.RecommendService;
 import com.example.bishe.util.CosineUtil;
+import com.example.bishe.util.RedisUtil;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -20,9 +19,11 @@ import java.util.stream.Collectors;
  */
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class RecommendServiceImpl implements RecommendService {
     private final UserCourseScoreMapper scoreMapper;
     private final CourseMapper courseMapper;
+    private final RedisUtil redisUtil;
 
     /**
      * 根据用户ID为其推荐最相关的课程列表（使用基于用户的协同过滤）。
@@ -33,6 +34,12 @@ public class RecommendServiceImpl implements RecommendService {
      */
     @Override
     public List<Course> recommend(Long userId, int topN) {
+
+        String cacheKey="recommend_user_"+userId+"_"+topN;
+
+        Object cachedData=redisUtil.get(cacheKey);
+        if(cachedData!=null)return (List<Course>) cachedData;
+
         // 获取所有用户对课程的评分记录
         List<UserCourseScore> all = scoreMapper.selectList(null);
 
@@ -41,6 +48,7 @@ public class RecommendServiceImpl implements RecommendService {
                 .count();
 
         if(userScoreCount<3){
+            System.out.println("用户评分不足3条，走热门兜底");
             return getHotCourse(all,topN);
         }
 
@@ -78,12 +86,34 @@ public class RecommendServiceImpl implements RecommendService {
                 });
 
         // 将加权评分总和除以相似度总和得到最终预测评分，并选出前topN项对应的课程信息
-        return weightSum.entrySet().stream()
-                .map(en -> Map.entry(en.getKey(), en.getValue() / simSum.get(en.getKey()))) // 计算预测评分
-                .sorted(Map.Entry.<Long, Double>comparingByValue().reversed())             // 按评分降序排列
-                .limit(topN)                                                               // 截取前topN项
-                .map(en -> courseMapper.selectById(en.getKey()))                           // 查询对应课程实体
-                .collect(Collectors.toList());                                             // 转换为List返回
+//        List<Course> recommendList =weightSum.entrySet().stream()
+//                .map(en -> Map.entry(en.getKey(), en.getValue() / simSum.get(en.getKey())))
+//                .sorted(Map.Entry.<Long, Double>comparingByValue().reversed())
+//                .limit(topN)
+//                .map(en -> courseMapper.selectById(en.getKey()))
+//                .collect(Collectors.toList());
+
+        //优化版，先拿ID列表
+        List<Long> hotIds=weightSum.entrySet().stream()
+                // 获取课程ID和预测评分
+                .map(en -> Map.entry(en.getKey(), en.getValue() / simSum.get(en.getKey())))
+                // 按预测评分降序排列
+                .sorted(Map.Entry.<Long, Double>comparingByValue().reversed())
+                // 截取前topN项
+                .limit(topN)
+                .map(Map.Entry::getKey)
+                .collect(Collectors.toList());
+
+        List<Course> recommendList=hotIds.isEmpty()?
+                new ArrayList<>():
+                courseMapper.selectBatchIds(hotIds);
+        // 恢复按 hotIds 顺序排序，保证推荐的高分课程在前
+        recommendList.sort(Comparator.comparingInt(c -> hotIds.indexOf(c.getId())));
+
+        System.out.println("推荐算法计算完成，准备存入缓存，结果数量：" + recommendList.size());
+        int expireTime=900+new Random().nextInt(600);
+        redisUtil.set(cacheKey,recommendList,expireTime);
+        return recommendList;
     }
 
     /**
@@ -94,13 +124,49 @@ public class RecommendServiceImpl implements RecommendService {
      */
     @Override
     public List<Course> getHotCourse(List<UserCourseScore> allScores, int topN){
-        return allScores.stream()
-                .collect(Collectors.groupingBy(UserCourseScore::getCourseId,
-                        Collectors.counting()))
+        //1.定义Key
+        String cacheKey="hot_courses_"+topN;
+
+        //2.尝试从Redis获取数据
+        try {
+            Object cachedData = redisUtil.get(cacheKey);
+            if (cachedData != null) {
+                //如果存在，则直接强转并返回
+                return (List<Course>) cachedData;
+            }
+        }catch (Exception e){
+            log.error("热门课程缓存读取异常，进入实时计算模式：{}",e.getMessage());
+        }
+
+        log.info("开始实时计算热门课程列表");
+
+        //3.如果不存在，则进行数据计算
+        List<Long> hotCourseIds =allScores.stream()
+                .collect(Collectors.groupingBy(UserCourseScore::getCourseId,Collectors.counting()))
                 .entrySet().stream()
                 .sorted(Map.Entry.<Long, Long>comparingByValue().reversed())
                 .limit(topN)
-                .map(entry -> courseMapper.selectById(entry.getKey()))//根据ID查询课程实体
+                .map(Map.Entry::getKey)
                 .collect(Collectors.toList());
-    }
+
+        if(hotCourseIds.isEmpty()) return new ArrayList<>();
+
+        List<Course> hotCourses = courseMapper.selectBatchIds(hotCourseIds).stream()
+                .filter(course -> course.getStatus() != null && course.getStatus() == 1)
+                .collect(Collectors.toList());
+
+        //4.性能优化：用selectBatchIds代替selectById(减少数据库连接次数)
+//        List<Course> hotCourses=courseMapper.selectBatchIds(hotCourseIds);
+        //保证查询出来的顺序和ID排序一致
+        hotCourses.sort(Comparator.comparingInt(c->hotCourseIds.indexOf(c.getId())));
+
+        //5.将结果缓存到Redis中，设置30分钟的过期时间
+        try {
+            int expireTime = 1800 + new Random().nextInt(600);
+            redisUtil.set(cacheKey, hotCourses, expireTime);
+        }catch (Exception e){
+            log.error("热门课程缓存写入异常：{}",e.getMessage());
+        }
+        return hotCourses;
+        }
 }

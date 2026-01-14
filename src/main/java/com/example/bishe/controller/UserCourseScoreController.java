@@ -1,6 +1,5 @@
 package com.example.bishe.controller;
 
-import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.example.bishe.entity.Course;
 import com.example.bishe.entity.R;
 import com.example.bishe.entity.UserCourseScore;
@@ -25,6 +24,7 @@ public class UserCourseScoreController {
     private final UserCourseScoreService userCourseScoreService;
     private final CourseService courseService;
 
+    //获取用户评分记录
     @GetMapping("/study/my-ratings")
     public R<List<Map<String, Object>>> getMyRatings(HttpServletRequest request){
         try {
@@ -33,14 +33,7 @@ public class UserCourseScoreController {
             Long userId= JwtUtil.getUserIdFromToken(token);
 
             //查询用户的评分记录
-           List<UserCourseScore> scores=userCourseScoreService.list(
-                   Wrappers.<UserCourseScore>lambdaQuery()
-                           .eq(UserCourseScore::getUserId,userId)
-                           .orderByDesc(UserCourseScore::getCreatedAt)
-           );
-
-            System.out.println("=== 调试信息 ===");
-            System.out.println("查询到记录数: " + scores.size());
+           List<UserCourseScore> scores =userCourseScoreService.getScoresByUserId(userId);
 
            List<Map<String, Object>> result =new ArrayList<>();
            for(UserCourseScore score:scores){

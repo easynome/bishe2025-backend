@@ -23,19 +23,7 @@ import java.util.List;
 public class RecommendController {
     private final RecommendService recommendService;
 
-//    /**
-//     * 获取用户课程推荐列表
-//     * 根据用户ID和推荐数量返回个性化的课程推荐
-//     *
-//     * @param userId 用户ID，用于识别需要推荐的用户
-//     * @param topN 推荐课程数量，默认为5
-//     * @return 包含推荐课程列表的响应结果
-//     */
-//    @GetMapping("/recommend")
-//    public R<List<Course>> recommend(@RequestParam Long userId,
-//                                     @RequestParam(defaultValue = "5") int topN) {
-//        return R.success(recommenService.recommend(userId, topN));
-//    }
+
     /**
      *
      * 获取用户课程推荐列表

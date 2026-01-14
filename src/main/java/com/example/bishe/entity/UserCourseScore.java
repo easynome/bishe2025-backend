@@ -20,4 +20,6 @@ public class UserCourseScore {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     @TableField("created_at")  // ✅ 确保有这个注解
     private Date createdAt;
+    @TableField("course_status")
+    private Integer courseStatus;
 }

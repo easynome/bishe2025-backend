@@ -326,7 +326,7 @@ const goToMyCourses = () => {
 }
 
 const goToCourseManagement = () => {
-  router.push('/operation/course')
+  router.push('/admin/courses/list')
 }
 onMounted(() => {
   loadDashboardData()

@@ -5,9 +5,12 @@ import com.example.bishe.entity.R;
 import com.example.bishe.entity.UserCourseScore;
 import com.example.bishe.service.CourseService;
 import com.example.bishe.service.UserCourseScoreService;
+import com.example.bishe.util.BaseContext;
 import com.example.bishe.util.JwtUtil;
+import com.example.bishe.vo.MyCourseVO;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -20,6 +23,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api")
 @RequiredArgsConstructor
+@Slf4j
 public class UserCourseScoreController {
     private final UserCourseScoreService userCourseScoreService;
     private final CourseService courseService;
@@ -54,5 +58,13 @@ public class UserCourseScoreController {
             e.printStackTrace();
             return R.failed("获取用户评分记录失败");
         }
+    }
+
+    @GetMapping("/study/my-courses")
+    public R<List<MyCourseVO>> getMyCourses(){
+        Long userId = BaseContext.getCurrentId();
+        log.info("当前用户ID：{}",userId);
+        List<MyCourseVO> list = userCourseScoreService.getMyCourseVOList(userId);
+        return R.success(list);
     }
 }

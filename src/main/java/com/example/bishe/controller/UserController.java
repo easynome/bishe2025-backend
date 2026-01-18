@@ -231,20 +231,5 @@ public class UserController {
 
         return R.success(status == 1 ? "用户已启用" :"用户已禁用");
     }
-    /**
-     * 校验密码（假设使用BCrypt）
-     */
-    private boolean checkPassword(String rawPassword, String encodedPassword) {
-        // 示例：return BCrypt.checkpw(rawPassword, encodedPassword);
-        // 实际项目需替换为真实加密工具
-        return rawPassword.equals(encodedPassword); // 占位符，实际不应如此实现！
-    }
-
-    /**
-     * 生成JWT Token
-     */
-    private String generateToken(String username,Long userId) {
-        return JwtUtil.generate(username,userId);
-    }
 }
 

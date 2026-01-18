@@ -1,5 +1,6 @@
-package com.example.bishe.intercetor;
+package com.example.bishe.interceptor;
 
+import com.example.bishe.util.BaseContext;
 import com.example.bishe.util.JwtUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -29,6 +30,7 @@ public class JwtInterceptor implements HandlerInterceptor {
         }
         String token = authHeader.substring(7);
         try{
+
             Long userId = JwtUtil.getUserIdFromToken(token);
             if(userId==null){
                 throw new RuntimeException("Token解析无效");
@@ -37,6 +39,7 @@ public class JwtInterceptor implements HandlerInterceptor {
             //这样后，在Controller中，就可以通过@RequestAttribute("currUserId") Long userId
             request.setAttribute("currUserId", userId);
 
+            BaseContext.setCurrentId(userId);
             log.info("用户ID:{}鉴权通过，请访问路径：{}",userId,request.getRequestURI());
             return true;
         }catch (Exception e){
@@ -44,5 +47,12 @@ public class JwtInterceptor implements HandlerInterceptor {
             //这里抛出的异常会被GlobalExceptionHandler处理
             throw new RuntimeException("登录已过期或凭证错误，请重新登录");
         }
+    }
+
+    @Override
+    public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
+        // 请求执行完后，清理背包，防止影响下一个请求（线程复用）
+        BaseContext.removeCurrentId();
+        log.info("线程上下文已清理");
     }
 }

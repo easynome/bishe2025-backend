@@ -4,6 +4,7 @@ package com.example.bishe.controller;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.example.bishe.common.annotation.Log;
 import com.example.bishe.entity.Course;
 import com.example.bishe.entity.R;
 import com.example.bishe.entity.User;
@@ -438,6 +439,7 @@ public class CourseController {
      * @param request HTTP请求对象
      * @return 操作结果
      */
+    @Log(title = "课程评分", businessType = 2)
     @PostMapping("/{id}/rate")
     public R<String> rateCourse(
             @NotNull @PathVariable Long id,

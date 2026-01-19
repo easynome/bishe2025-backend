@@ -699,6 +699,11 @@ Spring Cloud + 各ORM框架
 - **面试标准回答**：如果不提供无参构造器，Jackson 就找不到“入口”来创建对象。虽然 Java 默认会提供一个，但如果你加了 `@AllArgsConstructor`（全参构造），默认的无参构造就会失效。
 - **简历项目习惯**：所有的 DTO、VO、POJO 建议都加上 `@Data`、`@NoArgsConstructor` 和 `@AllArgsConstructor`，这是**企业级开发的基本规约**，保证了在各种序列化框架（Jackson、Hessian、Kryo）下的兼容性。
 
+### **复杂业务下的查询性能优化**
+
+- **N+1 性能优化**：针对关联表查询场景，设计并实现了基于 **“批量映射+内存组装”** 的查询策略。通过 Map 结构对关联数据进行预缓存组装，**规避了 SQL 长连接占用和频繁的数据库 IO 交互**，接口响应效率提升明显。
+- **无感身份鉴权**：重构鉴权模块，利用 **JWT 结合 ThreadLocal** 封装统一上下文对象（BaseContext），实现了用户信息在 Controller、Service 层间的透明传递，提升了代码的整洁度与安全性。
+
 ## 面试场景
 
 #### 你既然用了 Spring Cache 注解，怎么处理缓存不可用的情况？

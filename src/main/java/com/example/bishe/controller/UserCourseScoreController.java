@@ -5,7 +5,7 @@ import com.example.bishe.entity.R;
 import com.example.bishe.entity.UserCourseScore;
 import com.example.bishe.service.CourseService;
 import com.example.bishe.service.UserCourseScoreService;
-import com.example.bishe.util.BaseContext;
+import com.example.bishe.common.BaseContext;
 import com.example.bishe.util.JwtUtil;
 import com.example.bishe.vo.MyCourseVO;
 import jakarta.servlet.http.HttpServletRequest;

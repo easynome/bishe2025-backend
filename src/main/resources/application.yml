@@ -20,7 +20,11 @@ spring:
           max-idle: 10
           min-idle: 5
           max-wait: 100ms
-
+logging :
+    level:
+        com.example.bishe: debug
+        #Spring线程池初始化细节
+        org.springframework.web: info
 mybatis-plus:
   configuration:
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl

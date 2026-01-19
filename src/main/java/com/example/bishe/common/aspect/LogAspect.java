@@ -66,7 +66,7 @@ public class LogAspect {
                     .title(controllerLog.title())
                     .businessType(String.valueOf(controllerLog.businessType()))
                     .costTime(costTime)
-                    .status(exception==null?1:0)
+                    .status(exception==null?0:1)//0-成功，1-失败
                     .method(joinPoint.getSignature().getDeclaringTypeName()+"."+joinPoint.getSignature().getName())
                     .build();
 

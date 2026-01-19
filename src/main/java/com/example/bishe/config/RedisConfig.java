@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.jsontype.BasicPolymorphicTypeValidator;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
+import org.springframework.cache.annotation.CachingConfigurer;
 import org.springframework.cache.annotation.CachingConfigurerSupport;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cache.interceptor.CacheErrorHandler;
@@ -21,11 +22,21 @@ import org.springframework.data.redis.serializer.*;
 
 import java.time.Duration;
 
+/**
+ * Redis配置类
+ * 配置Redis序列化方式、RedisTemplate和缓存管理器
+ */
 @Configuration
 @EnableCaching
 @Slf4j
-public class RedisConfig extends CachingConfigurerSupport {
+public class RedisConfig implements CachingConfigurer {
 
+    /**
+     * 创建Redis序列化器
+     * 配置ObjectMapper以支持多态类型序列化
+     *
+     * @return Redis序列化器对象
+     */
     @Bean
     public RedisSerializer<Object> springSessionDefaultRedisSerializer() {
         ObjectMapper mapper = new ObjectMapper();
@@ -37,6 +48,15 @@ public class RedisConfig extends CachingConfigurerSupport {
         mapper.activateDefaultTyping(typeValidator, ObjectMapper.DefaultTyping.NON_FINAL);
         return new Jackson2JsonRedisSerializer<>(mapper, Object.class);
     }
+
+    /**
+     * 创建RedisTemplate实例
+     * 配置键值序列化方式
+     *
+     * @param factory Redis连接工厂
+     * @param serializer Redis序列化器
+     * @return RedisTemplate实例
+     */
     @Bean
     public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory factory,RedisSerializer<Object> serializer) {
         RedisTemplate<String, Object> template = new RedisTemplate<>();
@@ -51,10 +71,17 @@ public class RedisConfig extends CachingConfigurerSupport {
         return template;
     }
 
+    /**
+     * 创建缓存管理器
+     * 配置默认缓存策略和序列化方式
+     *
+     * @param factory Redis连接工厂
+     * @param serializer Redis序列化器
+     * @return 缓存管理器实例
+     */
     @Bean
     public CacheManager cacheManager(RedisConnectionFactory factory,RedisSerializer< Object> serializer) {
-
-
+        //配置Redis缓存默认设置
         RedisCacheConfiguration config = RedisCacheConfiguration.defaultCacheConfig()
                 //默认全局缓存1小时
                 .entryTtl(Duration.ofHours(1))
@@ -66,6 +93,12 @@ public class RedisConfig extends CachingConfigurerSupport {
                 .cacheDefaults(config)
                 .build();
     }
+    /**
+     * 重写缓存错误处理器
+     * 处理缓存操作中的异常情况
+     *
+     * @return 缓存错误处理器实例
+     */
     @Override
     @Bean
     public CacheErrorHandler errorHandler() {

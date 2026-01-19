@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.Serializable;
 import java.util.Date;
 
 @Data
@@ -24,7 +25,7 @@ import java.util.Date;
  */
 @Builder
 @TableName("sys_operation_log")
-public class OperationLog {
+public class OperationLog implements Serializable {
     @TableId(type = IdType.AUTO)
     private Long id;
 
@@ -42,4 +43,5 @@ public class OperationLog {
     private Long costTime; //耗时
     @TableField(fill = FieldFill.INSERT)//自动填充创建时间
     private Date operTime;
+
 }

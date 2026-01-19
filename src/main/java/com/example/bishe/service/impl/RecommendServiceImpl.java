@@ -1,5 +1,6 @@
 package com.example.bishe.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.example.bishe.entity.Course;
 import com.example.bishe.entity.UserCourseScore;
 import com.example.bishe.mapper.CourseMapper;
@@ -11,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import javax.management.Query;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -25,6 +27,9 @@ public class RecommendServiceImpl implements RecommendService {
     private final CourseMapper courseMapper;
     private final RedisUtil redisUtil;
 
+    //本地锁，用于控制单机开发（如果是分布式环境则使用Redisson）
+    private final Object lock = new Object();
+
     /**
      * 根据用户ID为其推荐最相关的课程列表（使用基于用户的协同过滤）。
      *
@@ -37,9 +42,19 @@ public class RecommendServiceImpl implements RecommendService {
 
         String cacheKey="recommend_user_"+userId+"_"+topN;
 
-        Object cachedData=redisUtil.get(cacheKey);
-        if(cachedData!=null)return (List<Course>) cachedData;
+        // 第一次检查缓存
+        List< Course> cachedData=redisUtil.get(cacheKey,List.class);
+        if(cachedData!=null)return cachedData;
 
+//        QueryWrapper<UserCourseScore> wrapper =new QueryWrapper<UserCourseScore>().last("limit 10000");
+        // 缓存不存在，加锁
+        synchronized (lock){
+            // 第二次检查缓存（防止在等锁期间缓存被其他线程写入）
+            cachedData=redisUtil.get(cacheKey,List.class);
+            if(cachedData!=null)return cachedData;
+
+            log.info("缓存失效，开始执行CF计算推荐结果，用户ID:{}", userId);
+        }
         // 获取所有用户对课程的评分记录
         List<UserCourseScore> all = scoreMapper.selectList(null);
 
@@ -104,6 +119,7 @@ public class RecommendServiceImpl implements RecommendService {
                 .map(Map.Entry::getKey)
                 .collect(Collectors.toList());
 
+
         List<Course> recommendList=hotIds.isEmpty()?
                 new ArrayList<>():
                 courseMapper.selectBatchIds(hotIds);
@@ -111,8 +127,14 @@ public class RecommendServiceImpl implements RecommendService {
         recommendList.sort(Comparator.comparingInt(c -> hotIds.indexOf(c.getId())));
 
         System.out.println("推荐算法计算完成，准备存入缓存，结果数量：" + recommendList.size());
-        int expireTime=900+new Random().nextInt(600);
-        redisUtil.set(cacheKey,recommendList,expireTime);
+
+        if (recommendList.isEmpty()) {
+            // 缓存空列表
+            redisUtil.set(cacheKey, new ArrayList<>(), 60); // 缓存空列表5分钟
+        } else {
+            int expireTime=900+new Random().nextInt(600);
+            redisUtil.set(cacheKey, recommendList, expireTime);
+        }
         return recommendList;
     }
 
@@ -129,10 +151,10 @@ public class RecommendServiceImpl implements RecommendService {
 
         //2.尝试从Redis获取数据
         try {
-            Object cachedData = redisUtil.get(cacheKey);
+            List<Course> cachedData = redisUtil.get(cacheKey, List.class);
             if (cachedData != null) {
                 //如果存在，则直接强转并返回
-                return (List<Course>) cachedData;
+                return cachedData;
             }
         }catch (Exception e){
             log.error("热门课程缓存读取异常，进入实时计算模式：{}",e.getMessage());

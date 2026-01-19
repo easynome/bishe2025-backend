@@ -2,11 +2,9 @@ package com.example.bishe.service.impl;
 
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.example.bishe.entity.R;
 import com.example.bishe.entity.User;
 import com.example.bishe.mapper.UserMapper;
 import com.example.bishe.service.UserService;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.cache.annotation.CacheEvict;

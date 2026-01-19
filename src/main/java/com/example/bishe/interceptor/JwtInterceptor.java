@@ -37,7 +37,10 @@ public class JwtInterceptor implements HandlerInterceptor {
             }
             //最重要一步：将解析出来的userId存入request域
             //这样后，在Controller中，就可以通过@RequestAttribute("currUserId") Long userId
-            request.setAttribute("currUserId", userId);
+
+            //相比BaseContext.getCurrentId()，setAttribute()只能在Controller中使用
+            //而BaseContext可以在同一线程的任意地方获取当前用户ID
+//            request.setAttribute("currUserId", userId);
 
             BaseContext.setCurrentId(userId);
             log.info("用户ID:{}鉴权通过，请访问路径：{}",userId,request.getRequestURI());

@@ -26,10 +26,10 @@ public class CacheCleanServiceImpl implements CacheCleanService {
 
     @Override
     public void cleanDashboardCache() {
-        redisUtil.delPattern("dashboard:course_stats");
+        redisUtil.del("dashboard:course_stats");
     }
 
-    @Async
+    @Async("logExecutor")
     @Override
     public void cleanAllAfterAction(Long userId) {
         cleanUserCache(userId);

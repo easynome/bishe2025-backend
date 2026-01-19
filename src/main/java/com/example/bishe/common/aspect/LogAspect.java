@@ -4,7 +4,7 @@ import com.example.bishe.common.BaseContext;
 import com.example.bishe.common.annotation.Log;
 import com.example.bishe.entity.OperationLog;
 
-import com.example.bishe.entity.R;
+import com.example.bishe.common.R;
 import com.example.bishe.service.AsyncLogService;
 
 import com.fasterxml.jackson.databind.ObjectMapper;

@@ -1,6 +1,6 @@
 package com.example.bishe.exception;
 
-import com.example.bishe.entity.R;
+import com.example.bishe.common.R;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;

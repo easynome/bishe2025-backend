@@ -8,18 +8,21 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.jsontype.BasicPolymorphicTypeValidator;
 import com.fasterxml.jackson.databind.jsontype.impl.LaissezFaireSubTypeValidator;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.Cursor;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ScanOptions;
 import org.springframework.stereotype.Component;
 
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 @Component
+@Slf4j
 public class RedisUtil {
     @Autowired
     private RedisTemplate<String, Object> redisTemplate;
-    private final ObjectMapper objectMapper = new ObjectMapper();
 
     //写入缓存
     public boolean set(String key, Object value){
@@ -51,26 +54,21 @@ public class RedisUtil {
         try{
             return key==null?null:redisTemplate.opsForValue().get(key);
         }catch (Exception e){
-            redisTemplate.delete( key);
+            e.printStackTrace();
             return null;
         }
 
     }
     // 添加一个安全的get方法，指定返回类型
+    //因为在RedisConfig中配置了Jackson的类型保留(PolymorphicTypeValidator)，所以这里需要一个安全的get方法，指定返回类型
     public <T> T get(String key, Class<T> clazz) {
         try {
             Object value = get(key);
             if (value == null) return null;
-
-            // 如果是目标类型直接返回
-            if (clazz.isInstance(value)) {
-                return clazz.cast(value);
-            }
-
-            // 否则尝试转换
-            return objectMapper.convertValue(value, clazz);
+            //直接尝试强转，如果类型不匹配，clazz.cast会抛出异常
+            return clazz.cast(value);
         } catch (Exception e) {
-            System.err.println("Redis获取指定类型数据失败，键：" + key + ", 错误：" + e.getMessage());
+            log.error("Redis获取数据类型转换失败，key:{},期待类型：{}",key,clazz);
             return null;
         }
     }
@@ -86,17 +84,26 @@ public class RedisUtil {
     }
 
     //批量删除匹配的键
-    public long delPattern(String pattern){
-        try{
-            Set<String> keys = redisTemplate.keys(pattern);
-            if(keys != null && !keys.isEmpty()){
-                return redisTemplate.delete(keys);
-            }
-            return 0;
-        }catch (Exception e){
-            e.printStackTrace();
-            return 0;
-        }
+    public long delPattern(String pattern) {
+
+        return redisTemplate.execute(connection -> {
+            long count = 0;
+            //使用迭代器模式，每次扫描100个
+            try (Cursor<byte[]> cursor = connection.scan(
+                    ScanOptions.scanOptions()
+                            .match(pattern)
+                            .count(100)
+                            .build())) {
+                while (cursor.hasNext()) {
+                    connection.del(cursor.next());
+                    count++;
+                }
+            } catch (Exception e) {
+                    log.error("SCAN模式匹配删除异常",e);
+                }
+                return count;
+            }, true);
+
     }
     //判断缓存中是否有对应的value
     public boolean hasKey(String key){

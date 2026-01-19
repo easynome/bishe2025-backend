@@ -1,7 +1,7 @@
 package com.example.bishe.controller;
 
 import com.example.bishe.entity.Course;
-import com.example.bishe.entity.R;
+import com.example.bishe.common.R;
 import com.example.bishe.service.RecommendService;
 import com.example.bishe.util.JwtUtil;
 import jakarta.servlet.http.HttpServletRequest;

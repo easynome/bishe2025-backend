@@ -7,7 +7,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.example.bishe.common.BaseContext;
 import com.example.bishe.common.annotation.Log;
 import com.example.bishe.entity.Course;
-import com.example.bishe.entity.R;
+import com.example.bishe.common.R;
 import com.example.bishe.entity.User;
 import com.example.bishe.entity.UserCourseScore;
 import com.example.bishe.mapper.UserCourseScoreMapper;
@@ -94,7 +94,6 @@ public class CourseController {
                                HttpServletRequest request) {
 
         Long userId = (Long) request.getAttribute("currUserId");
-
         //防御性编程，数据安全 + 业务逻辑验证
 
         if (!userService.hasTeacherRole(userId)) {

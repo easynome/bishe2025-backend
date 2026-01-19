@@ -7,7 +7,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.example.bishe.dto.LoginDTO;
 import com.example.bishe.dto.RegisterDTO;
 import com.example.bishe.dto.UpdatePwdDTO;
-import com.example.bishe.entity.R;
+import com.example.bishe.common.R;
 import com.example.bishe.entity.Role;
 import com.example.bishe.entity.User;
 import com.example.bishe.service.RoleService;

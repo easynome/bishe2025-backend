@@ -24,4 +24,6 @@ public interface CourseService extends IService<Course> {
     LambdaQueryWrapper<Course> buildBaseQueryWrapper(String keyword, Integer status);
     Map<String, Object> convertCourseWithTeacherInfo(Course course);
     Map<String, Object> convertCourseToMap(Course course);
+
+    void savaOrUpdateScore(Long userId, Long id, Integer score);
 }

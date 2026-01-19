@@ -27,10 +27,14 @@ public class AsyncLogService {
     @Transactional(propagation = Propagation.REQUIRES_NEW)//确保新事务独立
     public void saveLog(OperationLog operLog) {
         try{
+            //在存入数据库之前，对参数进行截断，避免数据过大
+            if (operLog.getOperParam() != null && operLog.getOperParam().length() > 2000) {
+                operLog.setOperParam(operLog.getOperParam().substring(0, 2000));
+            }
             //1.存入数据库
-//            operationLogMapper.insert(operLog);
-            throw new RuntimeException("模拟异常");
-//            log.debug("线程{}成功记录日志：{}",Thread.currentThread().getName(),operLog.getTitle());
+            operationLogMapper.insert(operLog);
+//            throw new RuntimeException("模拟异常");
+            log.debug("线程{}成功记录日志：{}",Thread.currentThread().getName(),operLog.getTitle());
 
         }catch (Exception e){
             //2.异步任务的异常处理（关键）

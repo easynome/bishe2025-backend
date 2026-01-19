@@ -4,6 +4,7 @@ package com.example.bishe.controller;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.example.bishe.common.BaseContext;
 import com.example.bishe.common.annotation.Log;
 import com.example.bishe.entity.Course;
 import com.example.bishe.entity.R;
@@ -436,7 +437,6 @@ public class CourseController {
      *
      * @param id      课程ID
      * @param score   评分值（1-5之间）
-     * @param request HTTP请求对象
      * @return 操作结果
      */
     @Log(title = "课程评分", businessType = 2)
@@ -446,33 +446,16 @@ public class CourseController {
             @NotNull
             @Min(value = 1, message = "评分须在范围1-5之间")
             @Max(value = 5, message = "评分须在范围1-5之间")
-            @RequestParam Integer score,
-            HttpServletRequest request) {
+            @RequestParam Integer score
+            ) {
 
-        //1.基础校验
-        Long userId = (Long) request.getAttribute("currUserId");
+        //基础校验
+        Long userId = BaseContext.getCurrentId();
         if (userId == null) {
             return R.failed("用户ID获取失败");
         }
-        //2.获取课程信息
-        Course course = courseService.getById(id);
-        if (course == null) return R.failed("课程不存在");
+        courseService.savaOrUpdateScore(userId,id,score);
 
-        //3.检查用户是否已经评分
-        UserCourseScore existing = userCourseScoreMapper.findByUserIdAndCourseId(userId, id);
-        //4.更新或插入评分
-        if (existing != null) {
-            existing.setScore(score);
-            userCourseScoreMapper.updateById(existing);
-
-        } else {
-            UserCourseScore newScore = new UserCourseScore();
-            newScore.setUserId(userId);
-            newScore.setCourseId(id);
-            newScore.setScore(score);
-            newScore.setCourseStatus(course.getStatus());
-            userCourseScoreMapper.insert(newScore);
-        }
         cacheCleanService.cleanAllAfterAction(userId);
         return R.success("评分成功");
     }

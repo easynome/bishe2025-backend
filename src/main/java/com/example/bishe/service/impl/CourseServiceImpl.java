@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.example.bishe.entity.Course;
+import com.example.bishe.entity.R;
 import com.example.bishe.entity.User;
 import com.example.bishe.entity.UserCourseScore;
 import com.example.bishe.mapper.CourseMapper;
@@ -246,6 +247,31 @@ public class CourseServiceImpl extends ServiceImpl<CourseMapper, Course>
         );
         item.put("studentCount", studentCount);
         return item;
+    }
+
+    //评分
+    @Override
+    public void savaOrUpdateScore(Long userId, Long id, Integer score) {
+        //获取课程信息
+        Course course = this.getById(id);
+        if (course == null) {
+            throw new RuntimeException("课程不存在");
+        }
+        //检查用户是否已经评分
+        UserCourseScore existing = userCourseScoreMapper.findByUserIdAndCourseId(userId, id);
+        //更新或插入评分
+        if (existing != null) {
+            existing.setScore(score);
+            userCourseScoreMapper.updateById(existing);
+
+        } else {
+            UserCourseScore newScore = new UserCourseScore();
+            newScore.setUserId(userId);
+            newScore.setCourseId(id);
+            newScore.setScore(score);
+            newScore.setCourseStatus(course.getStatus());
+            userCourseScoreMapper.insert(newScore);
+        }
     }
 
 }

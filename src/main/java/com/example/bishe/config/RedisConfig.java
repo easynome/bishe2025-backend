@@ -48,7 +48,6 @@ public class RedisConfig implements CachingConfigurer {
         mapper.activateDefaultTyping(typeValidator, ObjectMapper.DefaultTyping.NON_FINAL);
         return new Jackson2JsonRedisSerializer<>(mapper, Object.class);
     }
-
     /**
      * 创建RedisTemplate实例
      * 配置键值序列化方式

@@ -1,6 +1,7 @@
 package com.example.bishe.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.example.bishe.common.constants.RedisConstants;
 import com.example.bishe.entity.Course;
 import com.example.bishe.entity.UserCourseScore;
 import com.example.bishe.mapper.CourseMapper;
@@ -40,7 +41,7 @@ public class RecommendServiceImpl implements RecommendService {
     @Override
     public List<Course> recommend(Long userId, int topN) {
 
-        String cacheKey="recommend_user_"+userId+"_"+topN;
+        String cacheKey= RedisConstants.RECOMMEND_USER_PREFIX+userId+"_"+topN;
 
         // 第一次检查缓存
         List< Course> cachedData=redisUtil.get(cacheKey,List.class);
@@ -147,7 +148,7 @@ public class RecommendServiceImpl implements RecommendService {
     @Override
     public List<Course> getHotCourse(List<UserCourseScore> allScores, int topN){
         //1.定义Key
-        String cacheKey="hot_courses_"+topN;
+        String cacheKey=RedisConstants.HOT_COURSE_PREFIX+topN;
 
         //2.尝试从Redis获取数据
         try {

@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.example.bishe.common.BaseContext;
 import com.example.bishe.common.annotation.Log;
+import com.example.bishe.common.constants.RedisConstants;
 import com.example.bishe.entity.Course;
 import com.example.bishe.common.R;
 import com.example.bishe.entity.User;
@@ -373,7 +374,7 @@ public class CourseController {
     @GetMapping("/data")
 //    @Cacheable(value = "dashboard", key = "'admin_stats'")
     public R<Map<String, Object>> getDashboardData() {
-        String cacheKey = "dashboard:course_stats";
+        String cacheKey = RedisConstants.DASHBOARD_STATS_KEY;
         //第一步：尝试从Redis缓存中获取数据（读取降级）
         try {
             Object cached = redisUtil.get(cacheKey);

@@ -22,9 +22,9 @@ spring:
           max-wait: 100ms
 logging :
     level:
-        com.example.bishe: debug
+        com.example.bishe: $(LOG_LEVEL:info)
         #Spring线程池初始化细节
-        org.springframework.web: info
+        org.springframework.web: $(SPRING_WEB_LOG_LEVEL:info)
 mybatis-plus:
   configuration:
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl

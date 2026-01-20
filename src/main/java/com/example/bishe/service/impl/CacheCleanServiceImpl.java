@@ -1,5 +1,6 @@
 package com.example.bishe.service.impl;
 
+import com.example.bishe.common.constants.RedisConstants;
 import com.example.bishe.service.CacheCleanService;
 import com.example.bishe.util.RedisUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,19 +15,19 @@ public class CacheCleanServiceImpl implements CacheCleanService {
 
     @Override
     public void cleanUserCache(Long userId) {
-        redisUtil.del("userCourseScore:"+userId);
-        redisUtil.delPattern("recommend_user_"+userId+"*");
+        redisUtil.del(RedisConstants.COURSE_SCORE_PREFIX +userId);
+        redisUtil.delPattern(RedisConstants.RECOMMEND_USER_PREFIX+userId+"*");
     }
 
     @Override
     public void cleanCourseGlobalCache() {
-        redisUtil.delPattern("hot_courses_*");
-        redisUtil.delPattern("course::*");
+        redisUtil.delPattern(RedisConstants.HOT_COURSE_PREFIX+"*");
+        redisUtil.delPattern(RedisConstants.COURSE_CACHE_PREFIX+"*");
     }
 
     @Override
     public void cleanDashboardCache() {
-        redisUtil.del("dashboard:course_stats");
+        redisUtil.del(RedisConstants.DASHBOARD_STATS_KEY);
     }
 
     @Async("logExecutor")

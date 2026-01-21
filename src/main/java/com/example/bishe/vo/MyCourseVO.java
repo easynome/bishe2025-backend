@@ -6,6 +6,9 @@ import lombok.Data;
 import java.util.Date;
 
 
+/**
+     * vo类的作用：将数据库中的数据转换成前端需要的数据
+ */
 @Data
 public class MyCourseVO {
     private Long courseId;

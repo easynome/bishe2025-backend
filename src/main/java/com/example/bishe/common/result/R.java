@@ -1,4 +1,4 @@
-package com.example.bishe.common;
+package com.example.bishe.common.result;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

@@ -1,11 +1,11 @@
 package com.example.bishe.controller;
 
 import com.example.bishe.entity.Course;
-import com.example.bishe.common.R;
+import com.example.bishe.common.result.R;
 import com.example.bishe.entity.UserCourseScore;
 import com.example.bishe.service.CourseService;
 import com.example.bishe.service.UserCourseScoreService;
-import com.example.bishe.common.BaseContext;
+import com.example.bishe.common.context.BaseContext;
 import com.example.bishe.util.JwtUtil;
 import com.example.bishe.vo.MyCourseVO;
 import jakarta.servlet.http.HttpServletRequest;

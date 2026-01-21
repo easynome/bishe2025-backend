@@ -4,11 +4,12 @@ package com.example.bishe.controller;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.example.bishe.common.BaseContext;
+import com.example.bishe.common.annotation.RateLimit;
+import com.example.bishe.common.context.BaseContext;
 import com.example.bishe.common.annotation.Log;
 import com.example.bishe.common.constants.RedisConstants;
 import com.example.bishe.entity.Course;
-import com.example.bishe.common.R;
+import com.example.bishe.common.result.R;
 import com.example.bishe.entity.User;
 import com.example.bishe.entity.UserCourseScore;
 import com.example.bishe.mapper.UserCourseScoreMapper;
@@ -18,7 +19,6 @@ import com.example.bishe.service.UserService;
 import com.example.bishe.service.impl.RecommendServiceImpl;
 import com.example.bishe.util.RedisUtil;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -447,6 +447,7 @@ public class CourseController {
             description = "用户对课程进行1-5分评价，系统将异步记录审计日志并清理相关缓存"
             )
     @Log(title = "课程评分", businessType = 2)
+    @RateLimit(count=3, time=60)
     @PostMapping("/{id}/rate")
     public R<String> rateCourse(
             @NotNull @PathVariable Long id,

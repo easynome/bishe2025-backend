@@ -186,6 +186,7 @@ public class CourseServiceImpl extends ServiceImpl<CourseMapper, Course>
         return wrapper;
     }
 
+    //转换课程信息
     @Override
     public Map<String, Object> convertCourseWithTeacherInfo(Course course) {
         Map<String, Object> courseMap = new HashMap<>();

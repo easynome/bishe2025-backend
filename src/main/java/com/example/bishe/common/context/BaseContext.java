@@ -1,4 +1,4 @@
-package com.example.bishe.common;
+package com.example.bishe.common.context;
 
 public class BaseContext {
     private static ThreadLocal<Long> threadLocal = new ThreadLocal<>();

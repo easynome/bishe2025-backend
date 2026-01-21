@@ -1,6 +1,6 @@
 package com.example.bishe.interceptor;
 
-import com.example.bishe.common.BaseContext;
+import com.example.bishe.common.context.BaseContext;
 import com.example.bishe.util.JwtUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

@@ -16,11 +16,30 @@ public class WebMvcConfig implements WebMvcConfigurer {
     public void addInterceptors(InterceptorRegistry  registry){
         registry.addInterceptor(jwtInterceptor)
                 .addPathPatterns("/**")
-                .excludePathPatterns("/api/login","/api/register")
-                .excludePathPatterns("/api/course/list")
-                .excludePathPatterns("/api/course/data")
-                .excludePathPatterns("/error")
-                .excludePathPatterns("/static/**")
-                .excludePathPatterns("/favicon.ico");
+                // 1. 业务白名单
+                .excludePathPatterns(
+                        "/api/login",
+                        "/api/register",
+                        "/api/course/list",
+                        "/api/course/data"
+                )
+                // 2. 静态资源与错误处理
+                .excludePathPatterns(
+                        "/error",
+                        "/static/**",
+                        "/favicon.ico",
+                        "/resources/**"
+                )
+                // 3. Swagger/Knife4j 专用白名单（最关键）
+                .excludePathPatterns(
+                        "/doc.html",
+                        "/webjars/**",
+                        "/v3/api-docs",        // 精确匹配
+                        "/v3/api-docs/**",     // 匹配分组
+                        "/swagger-resources",
+                        "/swagger-resources/**",
+                        "/swagger-ui/**",
+                        "/swagger-ui.html"
+                );
     }
 }

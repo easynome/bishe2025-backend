@@ -24,7 +24,7 @@ public class JwtInterceptor implements HandlerInterceptor {
         String authHeader = request.getHeader("Authorization");
 
         //3.判断Authorization是否为空，或者格式是否正确
-        if(authHeader==null||!authHeader.startsWith("Bearer ")){
+        if(authHeader==null||!authHeader.regionMatches(true,0,"Bearer ",0,7)){
             log.warn("鉴权失败：未发现有效的Token Header");
             throw new RuntimeException("未登录，请先登录");
         }

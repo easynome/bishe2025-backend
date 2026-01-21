@@ -17,6 +17,9 @@ import com.example.bishe.service.CourseService;
 import com.example.bishe.service.UserService;
 import com.example.bishe.service.impl.RecommendServiceImpl;
 import com.example.bishe.util.RedisUtil;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
@@ -39,6 +42,7 @@ import java.util.stream.Collectors;
  * @author [作者名]
  * @date [创建日期]
  */
+@Tag(name="课程模块", description = "课程管理接口")//
 @Slf4j
 @RestController
 @RequestMapping("/api/course")
@@ -439,6 +443,9 @@ public class CourseController {
      * @param score   评分值（1-5之间）
      * @return 操作结果
      */
+    @Operation(summary = "对指定课程进行评分",
+            description = "用户对课程进行1-5分评价，系统将异步记录审计日志并清理相关缓存"
+            )
     @Log(title = "课程评分", businessType = 2)
     @PostMapping("/{id}/rate")
     public R<String> rateCourse(

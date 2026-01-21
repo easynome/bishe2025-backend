@@ -4,6 +4,8 @@ import com.example.bishe.entity.Course;
 import com.example.bishe.common.R;
 import com.example.bishe.service.RecommendService;
 import com.example.bishe.util.JwtUtil;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,13 +19,12 @@ import java.util.List;
  * 推荐控制器类
  * 处理课程推荐相关的HTTP请求
  */
+@Tag(name="课程推荐接口",description = "课程推荐接口")
 @RestController
 @RequestMapping("/api/recommend")
 @RequiredArgsConstructor
 public class RecommendController {
     private final RecommendService recommendService;
-
-
     /**
      *
      * 获取用户课程推荐列表
@@ -31,6 +32,8 @@ public class RecommendController {
      * @param request 请求对象，用于获取用户ID
      * @return 响应结果，包含推荐课程列表
      */
+
+    @Operation(summary = "获取用户课程推荐列表",description = "基于用户协同过滤算法实时计算（或从Redis获取）的个性化推荐")
     @GetMapping
     public R<List<Course>> recommend(@RequestParam(defaultValue = "5") int topN,
                                      HttpServletRequest request) {
@@ -46,7 +49,6 @@ public class RecommendController {
             if (userId == null) {
                 return R.failed("用户ID获取失败");
             }
-
             // 调用推荐服务
             List<Course> recommendations = recommendService.recommend(userId, topN);
             return R.success(recommendations);

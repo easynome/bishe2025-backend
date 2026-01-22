@@ -11,10 +11,14 @@ import com.example.bishe.util.CosineUtil;
 import com.example.bishe.util.RedisUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.management.Query;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -27,9 +31,12 @@ public class RecommendServiceImpl implements RecommendService {
     private final UserCourseScoreMapper scoreMapper;
     private final CourseMapper courseMapper;
     private final RedisUtil redisUtil;
+    // Redisson作用是获取锁
+    @Autowired
+    private RedissonClient redissonClient;
 
     //本地锁，用于控制单机开发（如果是分布式环境则使用Redisson）
-    private final Object lock = new Object();
+//    private final Object lock = new Object();
 
     /**
      * 根据用户ID为其推荐最相关的课程列表（使用基于用户的协同过滤）。
@@ -40,6 +47,8 @@ public class RecommendServiceImpl implements RecommendService {
      */
     @Override
     public List<Course> recommend(Long userId, int topN) {
+        String lockKey ="lock:recommend:"+userId;
+        RLock lock =redissonClient.getLock(lockKey);
 
         String cacheKey= RedisConstants.RECOMMEND_USER_PREFIX+userId+"_"+topN;
 
@@ -49,13 +58,95 @@ public class RecommendServiceImpl implements RecommendService {
 
 //        QueryWrapper<UserCourseScore> wrapper =new QueryWrapper<UserCourseScore>().last("limit 10000");
         // 缓存不存在，加锁
-        synchronized (lock){
-            // 第二次检查缓存（防止在等锁期间缓存被其他线程写入）
-            cachedData=redisUtil.get(cacheKey,List.class);
-            if(cachedData!=null)return cachedData;
+       try{
 
-            log.info("缓存失效，开始执行CF计算推荐结果，用户ID:{}", userId);
+           if(lock.tryLock(5,10, TimeUnit.SECONDS)) {
+               // 第二次检查缓存（防止在等锁期间缓存被其他线程写入）
+               cachedData = redisUtil.get(cacheKey, List.class);
+               if (cachedData != null) return cachedData;
+
+               //在锁的保护下执行计算逻辑
+               return recommendationCalculation(userId, topN, cacheKey);
+           }else{
+               log.warn("获取推荐锁超时，使用缓存数据或返回空结果");
+               return Collections.emptyList();
+           }
+        }catch(InterruptedException e){
+           Thread.currentThread().interrupt();
+           log.error("推荐计算被中断", e);
+           return Collections.emptyList();
+       }finally {
+           // 释放锁
+           if(lock.isHeldByCurrentThread()){
+               lock.unlock();
+           }
+       }
+    }
+
+    /**
+     * 冷启动兜底方法: 获取最热门的课程
+     * @param allScores
+     * @param topN
+     * @return
+     */
+    @Override
+    public List<Course> getHotCourse(List<UserCourseScore> allScores, int topN){
+        //1.定义Key
+        String cacheKey=RedisConstants.HOT_COURSE_PREFIX+topN;
+
+        //2.尝试从Redis获取数据
+        try {
+            List<Course> cachedData = redisUtil.get(cacheKey, List.class);
+            if (cachedData != null) {
+                //如果存在，则直接强转并返回
+                return cachedData;
+            }
+        }catch (Exception e){
+            log.error("热门课程缓存读取异常，进入实时计算模式：{}",e.getMessage());
         }
+
+        log.info("开始实时计算热门课程列表");
+
+        //3.如果不存在，则进行数据计算
+        List<Long> hotCourseIds =allScores.stream()
+                .collect(Collectors.groupingBy(UserCourseScore::getCourseId,Collectors.counting()))
+                .entrySet().stream()
+                .sorted(Map.Entry.<Long, Long>comparingByValue().reversed())
+                .limit(topN)
+                .map(Map.Entry::getKey)
+                .collect(Collectors.toList());
+
+        if(hotCourseIds.isEmpty()) return new ArrayList<>();
+
+        List<Course> hotCourses = courseMapper.selectBatchIds(hotCourseIds).stream()
+                .filter(course -> course.getStatus() != null && course.getStatus() == 1)
+                .collect(Collectors.toList());
+
+        //4.性能优化：用selectBatchIds代替selectById(减少数据库连接次数)
+//        List<Course> hotCourses=courseMapper.selectBatchIds(hotCourseIds);
+        //保证查询出来的顺序和ID排序一致
+        hotCourses.sort(Comparator.comparingInt(c->hotCourseIds.indexOf(c.getId())));
+
+        //5.将结果缓存到Redis中，设置30分钟的过期时间
+        try {
+            int expireTime = 1800 + new Random().nextInt(600);
+            redisUtil.set(cacheKey, hotCourses, expireTime);
+        }catch (Exception e){
+            log.error("热门课程缓存写入异常：{}",e.getMessage());
+        }
+        return hotCourses;
+    }
+
+    /**
+     * 基于用户的协同过滤算法进行推荐计算。
+     *
+     * @param userId       用户ID
+     * @param topN         推荐课程数量上限
+     * @param cacheKey     缓存Key
+     * @return 推荐的课程列表
+     */
+    private List<Course> recommendationCalculation(Long userId, int topN,String cacheKey) {
+        //开始计算
         // 获取所有用户对课程的评分记录
         List<UserCourseScore> all = scoreMapper.selectList(null);
 
@@ -138,58 +229,4 @@ public class RecommendServiceImpl implements RecommendService {
         }
         return recommendList;
     }
-
-    /**
-     * 冷启动兜底方法: 获取最热门的课程
-     * @param allScores
-     * @param topN
-     * @return
-     */
-    @Override
-    public List<Course> getHotCourse(List<UserCourseScore> allScores, int topN){
-        //1.定义Key
-        String cacheKey=RedisConstants.HOT_COURSE_PREFIX+topN;
-
-        //2.尝试从Redis获取数据
-        try {
-            List<Course> cachedData = redisUtil.get(cacheKey, List.class);
-            if (cachedData != null) {
-                //如果存在，则直接强转并返回
-                return cachedData;
-            }
-        }catch (Exception e){
-            log.error("热门课程缓存读取异常，进入实时计算模式：{}",e.getMessage());
-        }
-
-        log.info("开始实时计算热门课程列表");
-
-        //3.如果不存在，则进行数据计算
-        List<Long> hotCourseIds =allScores.stream()
-                .collect(Collectors.groupingBy(UserCourseScore::getCourseId,Collectors.counting()))
-                .entrySet().stream()
-                .sorted(Map.Entry.<Long, Long>comparingByValue().reversed())
-                .limit(topN)
-                .map(Map.Entry::getKey)
-                .collect(Collectors.toList());
-
-        if(hotCourseIds.isEmpty()) return new ArrayList<>();
-
-        List<Course> hotCourses = courseMapper.selectBatchIds(hotCourseIds).stream()
-                .filter(course -> course.getStatus() != null && course.getStatus() == 1)
-                .collect(Collectors.toList());
-
-        //4.性能优化：用selectBatchIds代替selectById(减少数据库连接次数)
-//        List<Course> hotCourses=courseMapper.selectBatchIds(hotCourseIds);
-        //保证查询出来的顺序和ID排序一致
-        hotCourses.sort(Comparator.comparingInt(c->hotCourseIds.indexOf(c.getId())));
-
-        //5.将结果缓存到Redis中，设置30分钟的过期时间
-        try {
-            int expireTime = 1800 + new Random().nextInt(600);
-            redisUtil.set(cacheKey, hotCourses, expireTime);
-        }catch (Exception e){
-            log.error("热门课程缓存写入异常：{}",e.getMessage());
-        }
-        return hotCourses;
-        }
 }

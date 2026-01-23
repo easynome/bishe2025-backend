@@ -141,6 +141,43 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
             </plugin>
+            <plugin>
+                <groupId>com.lazerycode.jmeter</groupId>
+                <artifactId>jmeter-maven-plugin</artifactId>
+                <version>3.8.0</version>
+                <executions>
+                    <execution>
+                        <id>configuration</id>
+                        <goals>
+                            <goal>configure</goal>
+                        </goals>
+                    </execution>
+
+                    <execution>
+                        <id>jmeter-tests</id>
+                        <phase>integration-test</phase>
+                        <goals>
+                            <goal>jmeter</goal>
+                        </goals>
+                    </execution>
+
+                    <execution>
+                        <id>jmeter-check-results</id>
+                        <goals>
+                            <goal>results</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <jmeterVersion>5.6.3</jmeterVersion>
+                    <testFilesDirectory>${project.basedir}/src/test/jmeter</testFilesDirectory>
+                    <!-- 自动生成 HTML Dashboard 报告 -->
+                    <generateReports>true</generateReports>
+                    <!-- 不加时间戳，文件名固定方便找 -->
+                    <appendResultsTimestamp>false</appendResultsTimestamp>
+
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 

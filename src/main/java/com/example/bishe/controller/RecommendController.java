@@ -1,5 +1,7 @@
 package com.example.bishe.controller;
 
+import com.example.bishe.common.annotation.RateLimit;
+import com.example.bishe.common.enums.LimitType;
 import com.example.bishe.entity.Course;
 import com.example.bishe.common.result.R;
 import com.example.bishe.service.RecommendService;
@@ -33,6 +35,7 @@ public class RecommendController {
      * @return 响应结果，包含推荐课程列表
      */
 
+    @RateLimit(count = 3, time = 60, limitType = LimitType.USER)
     @Operation(summary = "获取用户课程推荐列表",description = "基于用户协同过滤算法实时计算（或从Redis获取）的个性化推荐")
     @GetMapping
     public R<List<Course>> recommend(@RequestParam(defaultValue = "5") int topN,

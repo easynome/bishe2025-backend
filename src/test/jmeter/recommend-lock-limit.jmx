@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jmeterTestPlan version="1.2" properties="5.0" jmeter="5.6.3">
+  <hashTree>
+    <TestPlan guiclass="TestPlanGui" testclass="TestPlan" testname="Recommend 压测 - 带动态 Token" enabled="true">
+      <boolProp name="TestPlan.functional_mode">false</boolProp>
+      <boolProp name="TestPlan.serialize_threadgroups">false</boolProp>
+      <elementProp name="TestPlan.user_defined_variables" elementType="Arguments" guiclass="ArgumentsPanel" testclass="Arguments" enabled="true">
+        <collectionProp name="Arguments.arguments"/>
+      </elementProp>
+      <stringProp name="TestPlan.user_define_classpath"></stringProp>
+    </TestPlan>
+    <hashTree>
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="并发 100 用户" enabled="true">
+        <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
+        <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" enabled="true">
+          <boolProp name="LoopController.continue_forever">false</boolProp>
+          <stringProp name="LoopController.loops">1</stringProp>
+        </elementProp>
+        <stringProp name="ThreadGroup.num_threads">100</stringProp>
+        <stringProp name="ThreadGroup.ramp_time">1</stringProp>
+        <boolProp name="ThreadGroup.scheduler">false</boolProp>
+        <stringProp name="ThreadGroup.duration"></stringProp>
+        <stringProp name="ThreadGroup.delay"></stringProp>
+      </ThreadGroup>
+      <hashTree>
+        <ConfigTestElement guiclass="HttpDefaultsGui" testclass="ConfigTestElement" testname="HTTP 请求默认值" enabled="true">
+          <stringProp name="HTTPSampler.domain">${__P(server_host,localhost)}</stringProp>
+          <stringProp name="HTTPSampler.port">${__P(server_port,8080)}</stringProp>
+          <stringProp name="HTTPSampler.protocol">http</stringProp>
+          <stringProp name="HTTPSampler.contentEncoding"></stringProp>
+          <stringProp name="HTTPSampler.path"></stringProp>
+        </ConfigTestElement>
+        <hashTree/>
+        <HeaderManager guiclass="HeaderManagerGui" testclass="HeaderManager" testname="HTTP 信息头管理器" enabled="true">
+          <collectionProp name="HeaderManager.headers">
+            <elementProp name="" elementType="Header">
+              <stringProp name="Header.name">Authorization</stringProp>
+              <stringProp name="Header.value">Bearer ${__P(access_token,)}</stringProp>
+            </elementProp>
+            <elementProp name="" elementType="Header">
+              <stringProp name="Header.name">Content-Type</stringProp>
+              <stringProp name="Header.value">application/json</stringProp>
+            </elementProp>
+            <elementProp name="" elementType="Header">
+              <stringProp name="Header.name">Accept</stringProp>
+              <stringProp name="Header.value">application/json</stringProp>
+            </elementProp>
+          </collectionProp>
+        </HeaderManager>
+        <hashTree/>
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="/api/recommend?topN=5" enabled="true">
+          <boolProp name="HTTPSampler.postBodyRaw">false</boolProp>
+          <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+            <collectionProp name="Arguments.arguments"/>
+          </elementProp>
+          <stringProp name="HTTPSampler.domain"></stringProp>
+          <stringProp name="HTTPSampler.port"></stringProp>
+          <stringProp name="HTTPSampler.protocol"></stringProp>
+          <stringProp name="HTTPSampler.contentEncoding"></stringProp>
+          <stringProp name="HTTPSampler.path">/api/recommend?topN=${__P(top_n,5)}</stringProp>
+          <stringProp name="HTTPSampler.method">GET</stringProp>
+          <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+          <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
+          <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+          <boolProp name="HTTPSampler.DO_MULTIPART_POST">false</boolProp>
+          <stringProp name="HTTPSampler.embedded_url_re"></stringProp>
+          <stringProp name="HTTPSampler.connect_timeout"></stringProp>
+          <stringProp name="HTTPSampler.response_timeout"></stringProp>
+        </HTTPSamplerProxy>
+<!--         <hashTree/> -->
+        <!-- 调试用，可选 -->
+<!--         <ResultCollector guiclass="ViewResultsFullVisualizer" testclass="ResultCollector" testname="查看结果树" enabled="true"> -->
+<!--           <boolProp name="ResultCollector.error_only">false</boolProp> -->
+<!--           <objProp> -->
+<!--             <name>saveConfig</name> -->
+<!--             <value class="SampleSaveConfiguration"> -->
+<!--               <time>true</time> -->
+<!--               <latency>true</latency> -->
+
+<!--               <bytes>true</bytes> -->
+<!--               <sentBytes>true</sentBytes> -->
+<!--               <threadCounts>true</threadCounts> -->
+<!--               <idleTime>true</idleTime> -->
+<!--               <timestamp>true</timestamp> -->
+<!--               <success>true</success> -->
+<!--               <label>true</label> -->
+<!--               <code>true</code> -->
+<!--               <message>false</message> -->
+
+<!--               <responseData>false</responseData> -->
+<!--               <responseFields>false</responseFields> -->
+<!--               <samplerData>false</samplerData> -->
+<!--               <xml>true</xml> -->
+<!--               <fieldNames>true</fieldNames> -->
+<!--               <responseHeaders>false</responseHeaders> -->
+<!--               <requestHeaders>false</requestHeaders> -->
+<!--               <responseDataOnError>false</responseDataOnError> -->
+<!--               <saveAssertionResultsFailureMessage>true</saveAssertionResultsFailureMessage> -->
+<!--               <assertions>false</assertions> -->
+<!--               <subresults>false</subresults> -->
+<!--               <fieldNamesStay>false</fieldNamesStay> -->
+<!--             </value> -->
+<!--           </objProp> -->
+<!--           <stringProp name="filename"></stringProp> -->
+<!--         </ResultCollector> -->
+<!--         <hashTree/> -->
+      </hashTree>
+    </hashTree>
+  </hashTree>
+</jmeterTestPlan>

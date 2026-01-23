@@ -20,6 +20,8 @@ spring:
           max-idle: 10
           min-idle: 5
           max-wait: 100ms
+      host: localhost
+      port: 6379
 logging :
     level:
         com.example.bishe: ${LOG_LEVEL:info}

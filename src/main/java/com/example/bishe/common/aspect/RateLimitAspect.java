@@ -35,6 +35,7 @@ public class RateLimitAspect {
     @Around("@annotation(rateLimit)")
     public Object intercept(ProceedingJoinPoint joinPoint, RateLimit rateLimit) throws Throwable {
         // 构建Key:限流前缀 + 用户ID
+        // key="rate_limit:1"
         String key = rateLimit.key() + BaseContext.getCurrentId();
         long now = System.currentTimeMillis();
         long window =rateLimit.time() * 1000L;
@@ -50,6 +51,8 @@ public class RateLimitAspect {
             log.warn("用户{}触发限流", BaseContext.getCurrentId());
             throw new RuntimeException("请求太频繁,请稍后再试");
         }
+        log.info("限流 key = {}, now = {}, window = {}, limit = {}",
+                key, now, window, rateLimit.count());
 
         return joinPoint.proceed();
     }

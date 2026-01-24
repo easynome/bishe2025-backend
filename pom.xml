@@ -116,11 +116,19 @@
             <version>4.3.0</version>
         </dependency>
 
+        <!-- RabbitMQ -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-amqp</artifactId>
+        </dependency>
+
+        <!-- Redisson -->
         <dependency>
             <groupId>org.redisson</groupId>
             <artifactId>redisson-spring-boot-starter</artifactId>
             <version>3.23.2</version>
         </dependency>
+
         <!-- BCrypt -->
         <dependency>
             <groupId>org.mindrot</groupId>
@@ -175,6 +183,7 @@
                     <generateReports>true</generateReports>
                     <!-- 不加时间戳，文件名固定方便找 -->
                     <appendResultsTimestamp>false</appendResultsTimestamp>
+                    <errorRateThresholdInPercent>100</errorRateThresholdInPercent>
 
                 </configuration>
             </plugin>

@@ -145,8 +145,10 @@ public class RecommendServiceImpl implements RecommendService {
      * @param cacheKey     缓存Key
      * @return 推荐的课程列表
      */
-    private List<Course> recommendationCalculation(Long userId, int topN,String cacheKey) {
-        //开始计算
+    @Override
+    public List<Course> recommendationCalculation(Long userId, int topN,String cacheKey) {
+        log.info("开始执行核心算法计算，用户ID:{}",userId);
+        // 开始计算
         // 获取所有用户对课程的评分记录
         List<UserCourseScore> all = scoreMapper.selectList(null);
 

@@ -22,6 +22,15 @@ spring:
           max-wait: 100ms
       host: localhost
       port: 6379
+
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+    # 消息可靠性投递配置
+    publisher-confirm-type: correlated
+    publisher-returns: true
 logging :
     level:
         com.example.bishe: ${LOG_LEVEL:info}

@@ -5,7 +5,7 @@ local window = tonumber(ARGV[2])
 local limit = tonumber(ARGV[3])
 
 -- 1. 移除过期数据 (清理窗口外的请求)
-redis.call('zremrangebyscore', key, 0, now - window * 1000)
+redis.call('zremrangebyscore', key, 0, now - window )
 
 -- 2. 统计当前窗口请求数
 local count = redis.call('zcard', key)

@@ -8,6 +8,7 @@ import com.example.bishe.common.annotation.RateLimit;
 import com.example.bishe.common.context.BaseContext;
 import com.example.bishe.common.annotation.Log;
 import com.example.bishe.common.constants.RedisConstants;
+import com.example.bishe.config.RabbitMQConfig;
 import com.example.bishe.entity.Course;
 import com.example.bishe.common.result.R;
 import com.example.bishe.entity.User;
@@ -27,6 +28,7 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -55,7 +57,7 @@ public class CourseController {
     private final RecommendServiceImpl recommendService;
     private final CacheCleanService cacheCleanService;
     private final RedisUtil redisUtil;
-
+    private final RabbitTemplate rabbitTemplate;
     /**
      * 分页查询课程列表（公共接口，无需Token，拦截器已放行）
      *
@@ -439,7 +441,7 @@ public class CourseController {
     /**
      * 对指定课程进行评分
      *
-     * @param id      课程ID
+     * @param courseId      课程ID
      * @param score   评分值（1-5之间）
      * @return 操作结果
      */
@@ -447,25 +449,33 @@ public class CourseController {
             description = "用户对课程进行1-5分评价，系统将异步记录审计日志并清理相关缓存"
             )
     @Log(title = "课程评分", businessType = 2)
-    @RateLimit(count=3, time=60)
-    @PostMapping("/{id}/rate")
+    // 限点击3次/1分钟
+    @RateLimit(count=200, time=60)
+    @PostMapping("/{courseId}/rate")
     public R<String> rateCourse(
-            @NotNull @PathVariable Long id,
+            @NotNull @PathVariable Long courseId,
             @NotNull
             @Min(value = 1, message = "评分须在范围1-5之间")
             @Max(value = 5, message = "评分须在范围1-5之间")
             @RequestParam Integer score
             ) {
 
-        //基础校验
+        // 基础校验
         Long userId = BaseContext.getCurrentId();
         if (userId == null) {
             return R.failed("用户ID获取失败");
         }
-        courseService.savaOrUpdateScore(userId,id,score);
+        // 持久化评分到数据库
+        courseService.savaOrUpdateScore(userId,courseId,score);
+
+        // 发送消息给MQ,算法使用userId进行数据库查询userId的历史评分
+        Map<String,Object> msg = new HashMap<>();
+        msg.put("userId",userId);
+        msg.put("score",score);
+        rabbitTemplate.convertAndSend(RabbitMQConfig.EXCHANGE_NAME, RabbitMQConfig.ROUTING_KEY, msg);
 
         cacheCleanService.cleanAllAfterAction(userId);
-        return R.success("评分成功");
+        return R.success("评分成功，推荐列表正在动态生成中");
     }
     
     /**

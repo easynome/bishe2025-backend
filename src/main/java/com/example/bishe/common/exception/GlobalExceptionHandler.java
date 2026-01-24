@@ -23,7 +23,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<R<String>> handleRuntimeException(RuntimeException e){
         log.error("系统运行时异常：{}",e.getMessage());
 
-        //如果是限流异常
+        //如果是限流异常 返回429
         if(e.getMessage()!=null&&e.getMessage().contains("请求太频繁")){
             return ResponseEntity
                     //响应状态码429

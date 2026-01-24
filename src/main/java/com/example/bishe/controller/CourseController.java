@@ -9,6 +9,7 @@ import com.example.bishe.common.context.BaseContext;
 import com.example.bishe.common.annotation.Log;
 import com.example.bishe.common.constants.RedisConstants;
 import com.example.bishe.config.RabbitMQConfig;
+import com.example.bishe.dto.RecommendMsgDTO;
 import com.example.bishe.entity.Course;
 import com.example.bishe.common.result.R;
 import com.example.bishe.entity.User;
@@ -29,6 +30,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -58,6 +60,7 @@ public class CourseController {
     private final CacheCleanService cacheCleanService;
     private final RedisUtil redisUtil;
     private final RabbitTemplate rabbitTemplate;
+
     /**
      * 分页查询课程列表（公共接口，无需Token，拦截器已放行）
      *
@@ -438,6 +441,9 @@ public class CourseController {
         return R.success(result);
     }
 
+
+    @Value("${recommend.mode:async}")
+    private String recommendMode;
     /**
      * 对指定课程进行评分
      *
@@ -467,14 +473,23 @@ public class CourseController {
         }
         // 持久化评分到数据库
         courseService.savaOrUpdateScore(userId,courseId,score);
+        cacheCleanService.cleanAllAfterAction(userId);
 
         // 发送消息给MQ,算法使用userId进行数据库查询userId的历史评分
         Map<String,Object> msg = new HashMap<>();
         msg.put("userId",userId);
         msg.put("score",score);
-        rabbitTemplate.convertAndSend(RabbitMQConfig.EXCHANGE_NAME, RabbitMQConfig.ROUTING_KEY, msg);
+        if("async".equalsIgnoreCase(recommendMode)){
+            rabbitTemplate.convertAndSend(
+                    RabbitMQConfig.EXCHANGE_NAME,
+                    RabbitMQConfig.ROUTING_KEY,
+                    new RecommendMsgDTO(userId)
+            );
+        }else{
+            recommendService.recommend(userId,5);
+        }
 
-        cacheCleanService.cleanAllAfterAction(userId);
+
         return R.success("评分成功，推荐列表正在动态生成中");
     }
     

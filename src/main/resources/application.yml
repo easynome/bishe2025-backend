@@ -31,6 +31,10 @@ spring:
     # 消息可靠性投递配置
     publisher-confirm-type: correlated
     publisher-returns: true
+
+#推荐系统配置
+recommend:
+  mode: async
 logging :
     level:
         com.example.bishe: ${LOG_LEVEL:info}

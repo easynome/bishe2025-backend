@@ -21,7 +21,7 @@ import java.util.List;
  * 推荐控制器类
  * 处理课程推荐相关的HTTP请求
  *
- * @author 吴景辉
+ * @author Eddie Wu
  */
 @Tag(name="课程推荐接口",description = "课程推荐接口")
 @RestController

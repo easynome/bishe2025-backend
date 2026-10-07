@@ -23,7 +23,7 @@ import java.util.Map;
 /**
  * 评分控制器：用户评分记录与已学课程查询。
  *
- * @author 吴景辉
+ * @author Eddie Wu
  */
 @RestController
 @RequestMapping("/api")

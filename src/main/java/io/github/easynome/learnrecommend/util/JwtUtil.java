@@ -12,7 +12,7 @@ import io.jsonwebtoken.Claims;
 /**
  * JWT 工具类：令牌生成与解析。
  *
- * @author 吴景辉
+ * @author Eddie Wu
  */
 public class JwtUtil {
     //暂时使用硬编码

@@ -195,5 +195,5 @@ JMeter 压测脚本（推荐接口锁与限流）位于 `src/test/jmeter/`，可
 
 ## 许可证与说明
 
-- 本项目采用 [MIT 许可证](LICENSE)，Copyright (c) 2025 吴景辉
+- 本项目采用 [MIT 许可证](LICENSE)，Copyright (c) 2025 Eddie Wu
 - 开发过程中部分代码借助 AI 辅助工具生成；系统架构设计、业务实现与调试由作者完成

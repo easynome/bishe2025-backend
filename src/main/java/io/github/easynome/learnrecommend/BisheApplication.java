@@ -7,7 +7,7 @@ import org.springframework.scheduling.annotation.EnableAsync;
 /**
  * 个性化学习推荐系统启动入口。
  *
- * @author 吴景辉
+ * @author Eddie Wu
  */
 @EnableAsync
 @SpringBootApplication

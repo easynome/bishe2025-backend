@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 /**
  * 推荐服务实现类，基于用户协同过滤算法为用户推荐课程。
  *
- * @author 吴景辉
+ * @author Eddie Wu
  */
 @Service
 @RequiredArgsConstructor

@@ -5,7 +5,7 @@ import java.util.*;
 /**
  * 基于用户的余弦相似度 + Top-N 推荐
  *
- * @author 吴景辉
+ * @author Eddie Wu
  */
 public class CosineUtil {
 

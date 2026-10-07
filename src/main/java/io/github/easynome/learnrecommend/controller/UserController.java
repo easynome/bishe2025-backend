@@ -27,7 +27,7 @@ import java.util.stream.Collectors;
 /**
  * 用户控制器：登录注册、用户信息与管理员用户管理。
  *
- * @author 吴景辉
+ * @author Eddie Wu
  */
 @RestController
 @RequestMapping("/api")

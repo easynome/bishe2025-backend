@@ -43,7 +43,7 @@ import java.util.stream.Collectors;
  * 课程控制器 - 处理课程相关的API请求
  * 包含公共课程查询、教师端课程管理、管理员端课程管理等功能
  *
- * @author 吴景辉
+ * @author Eddie Wu
  */
 @Tag(name="课程模块", description = "课程管理接口")//
 @Slf4j

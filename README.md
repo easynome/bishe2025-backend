@@ -65,7 +65,8 @@ flowchart LR
 
 ```text
 bishe2025-backend/
-├─ src/main/java/com/example/bishe/
+├─ LICENSE             # MIT 许可证
+├─ src/main/java/io/github/easynome/learnrecommend/
 │  ├─ common/          # 统一返回 R、全局异常、注解、AOP 切面、常量
 │  ├─ config/          # Redis / RabbitMQ / Redisson / CORS / Swagger / 拦截器配置
 │  ├─ controller/      # 控制层：用户、课程、推荐、评分
@@ -189,3 +190,10 @@ JMeter 压测脚本（推荐接口锁与限流）位于 `src/test/jmeter/`，可
 | GET  | `/api/course/data` | 首页看板数据 |
 
 ![推荐接口](docs/02-api-recommend.png)
+
+---
+
+## 许可证与说明
+
+- 本项目采用 [MIT 许可证](LICENSE)，Copyright (c) 2025 吴景辉
+- 开发过程中部分代码借助 AI 辅助工具生成；系统架构设计、业务实现与调试由作者完成

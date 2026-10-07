@@ -71,7 +71,7 @@
     管理员：登录 → 管理用户
 ## 重要文件位置
 
-    后端代码：/backend/src/main/java/com/example/bishe/
+    后端代码：/backend/src/main/java/io/github/easynome/learnrecommend/
 
     前端代码：/frontend/src/
 

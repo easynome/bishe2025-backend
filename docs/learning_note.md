@@ -79,7 +79,7 @@
 这是 Jackson 为了解决著名的 **“反序列化漏洞”** 引入的机制。
 
 - **风险场景**：如果 Redis 中存入了一个恶意的类名，当系统反序列化时，如果不做限制，Jackson 可能会实例化该恶意类并触发其内部代码（RCE 攻击）。
-- **你的代码逻辑**：虽然你这里写的是 `Object.class`（依然比较宽松），但它建立了一个**显式的校验器**。在更严格的生产环境下，你可以把它改成 `allowIfBaseType("com.example.bishe.entity")`，这样 Jackson 就只允许反序列化你自己的实体类，安全性拉满。
+- **你的代码逻辑**：虽然你这里写的是 `Object.class`（依然比较宽松），但它建立了一个**显式的校验器**。在更严格的生产环境下，你可以把它改成 `allowIfBaseType("io.github.easynome.learnrecommend.entity")`，这样 Jackson 就只允许反序列化你自己的实体类，安全性拉满。
 
 ------
 
@@ -554,7 +554,7 @@ toQueryWrapper / toSpecification
 ##### **3. 包结构设计**
 
 ```
-com.example.project
+io.github.easynome.project
 ├── controller
 │   └── UserController.java
 ├── service

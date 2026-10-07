@@ -8,23 +8,31 @@
         <version>3.2.5</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
-    <groupId>com.example</groupId>
-    <artifactId>bishe</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
-    <name>bishe</name>
-    <description>bishe</description>
-    <url/>
+    <groupId>io.github.easynome</groupId>
+    <artifactId>learnrecommend</artifactId>
+    <version>0.1.0-SNAPSHOT</version>
+    <name>Personalized Learning Recommendation System</name>
+    <description>基于 Spring Boot 3 + Vue 3 的个性化学习推荐系统：用户协同过滤与余弦相似度，含 Redis 缓存、RabbitMQ 异步、限流与压测</description>
+    <url>https://github.com/easynome/bishe2025-backend</url>
+    <inceptionYear>2025</inceptionYear>
     <licenses>
-        <license/>
+        <license>
+            <name>MIT License</name>
+            <url>https://opensource.org/license/mit</url>
+            <distribution>repo</distribution>
+        </license>
     </licenses>
     <developers>
-        <developer/>
+        <developer>
+            <name>吴景辉</name>
+            <email>853462880@qq.com</email>
+            <url>https://github.com/easynome</url>
+        </developer>
     </developers>
     <scm>
-        <connection/>
-        <developerConnection/>
-        <tag/>
-        <url/>
+        <connection>scm:git:git://github.com/easynome/bishe2025-backend.git</connection>
+        <developerConnection>scm:git:ssh://github.com/easynome/bishe2025-backend.git</developerConnection>
+        <url>https://github.com/easynome/bishe2025-backend/tree/enhance</url>
     </scm>
     <properties>
         <java.version>17</java.version>
